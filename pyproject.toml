@@ -1,0 +1,36 @@
+# ---- 构建系统：声明用 setuptools 打包（pip install -e . 依赖这里）----
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# ---- 项目元数据：名称、版本、Python 版本要求 ----
+[project]
+name = "minicode"
+version = "0.1.0"
+description = "本地 AI Coding Agent Runtime"
+# 最低 Python 版本：用到 dataclass slots、X | Y 联合类型等 3.10+ 特性
+requires-python = ">=3.11"
+# 运行时零依赖：Agent Runtime 全部自研，不引入 LangChain / httpx 等第三方库
+dependencies = []
+
+# ---- 可选依赖：开发/测试时用 `pip install -e ".[dev]"` 安装 ----
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+# ---- 控制台入口：安装后生成 minicode-py / minicode-headless 两个命令 ----
+# 指向的 minicode.main:main 与 minicode.headless:main 在 Day 21 实现；
+# setuptools 安装时不校验目标模块是否存在，运行时才解析，所以现在可以先声明。
+[project.scripts]
+minicode-py = "minicode.main:main"
+minicode-headless = "minicode.headless:main"
+
+# ---- 包发现：只打包 minicode 包及其子包（排除 tests、docs 等）----
+[tool.setuptools.packages.find]
+include = ["minicode*"]
+
+# ---- pytest 配置 ----
+[tool.pytest.ini_options]
+# 只从 tests/ 目录收集测试
+testpaths = ["tests"]
+# 忽略 fixtures：buggy_calculator 的测试是故意失败的演示，不进入主测试套件
+addopts = "--ignore=tests/fixtures"

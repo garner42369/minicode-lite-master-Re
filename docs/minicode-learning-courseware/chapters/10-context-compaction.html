@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>4.1 上下文治理：长任务为什么不会轻易爆掉 - MiniCode 学习课件</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>MiniCode 课件</h1>
+      <p>源码深度讲解</p>
+    </div>
+    <nav class="nav">
+      <a href="../index.html">课程首页</a>
+      <a href="01-project-map.html" class="">1.1 项目图谱：MiniCode 到底是什么</a>
+<a href="02-how-to-read.html" class="">1.2 源码阅读路线：先主链路再子系统</a>
+<a href="03-env-runtime.html" class="">2.1 环境、依赖与运行形态</a>
+<a href="04-entry-flow.html" class="">2.2 入口层：CLI 与 Headless</a>
+<a href="05-agent-loop.html" class="">3.1 Agent 主循环：从想法到工具执行</a>
+<a href="06-tool-calling.html" class="">3.2 Tool Calling：工具注册、执行与截断</a>
+<a href="07-permission-safety.html" class="">3.3 权限与安全：让 Agent 可控地操作本地环境</a>
+<a href="08-model-adapter.html" class="">3.4 模型适配：Anthropic-first 但不是 Anthropic-only</a>
+<a href="09-prompt-product.html" class="">3.5 Prompt 与产品面：系统提示词不是一段字符串</a>
+<a href="10-context-compaction.html" class="active">4.1 上下文治理：长任务为什么不会轻易爆掉</a>
+<a href="11-memory-system.html" class="">4.2 记忆系统：从临时上下文到可复用经验</a>
+<a href="12-session-recovery.html" class="">4.3 会话、Checkpoint 与 Rewind</a>
+<a href="13-mcp-skills-hooks.html" class="">5.1 MCP、Skills 与 Hooks：扩展 Agent 能力边界</a>
+<a href="14-subagent-task.html" class="">5.2 子代理与任务协作：主控不失控</a>
+<a href="15-cli-tui.html" class="">5.3 CLI/TUI：本地产品交互面</a>
+<a href="16-harness-eval.html" class="">6.1 Harness 与评估：让 Agent 质量可度量</a>
+<a href="17-cybernetic-control.html" class="">6.2 控制系统：把 Agent 当成可调节运行系统</a>
+<a href="18-tests-ci-docker.html" class="">7.1 测试、CI 与部署：工程质量怎么兜底</a>
+<a href="19-source-index.html" class="">7.2 源码索引：核心文件逐类速查</a>
+<a href="20-highlights-difficulties.html" class="">8.1 亮点、难点与解决方案</a>
+<a href="21-labs.html" class="">8.2 源码精读实验与二次开发任务</a>
+<a href="22-final-review.html" class="">8.3 全项目复盘：只看这一页也能讲清 MiniCode</a>
+    </nav>
+  </aside>
+  <main class="content">
+    <section>
+      <h1>4.1 上下文治理：长任务为什么不会轻易爆掉</h1>
+<h2 id="学习目标">学习目标</h2>
+<ul>
+<li>理解 Coding Agent 为什么特别容易上下文爆炸。</li>
+<li>掌握 MiniCode 的上下文压缩链路。</li>
+<li>区分 Micro Compact、Auto Compact 和 Reactive Compact。</li>
+</ul>
+<h2 id="上下文爆炸来自哪里">上下文爆炸来自哪里</h2>
+<p>Coding Agent 的上下文增长速度比普通聊天快得多，因为它会不断产生：</p>
+<ul>
+<li>用户需求和澄清。</li>
+<li>模型推理过程。</li>
+<li>文件读取结果。</li>
+<li>grep 搜索结果。</li>
+<li>命令和测试输出。</li>
+<li>Git diff。</li>
+<li>工具错误堆栈。</li>
+<li>中间计划和验证记录。</li>
+</ul>
+<p>如果全部塞进 messages，很快超过模型窗口。</p>
+<h2 id="ContextManager">ContextManager</h2>
+<p><code>context_manager.py</code> 负责基础上下文管理：</p>
+<ul>
+<li>模型 context window 识别。</li>
+<li>token 估算。</li>
+<li>CJK 友好的 token 估算。</li>
+<li>context stats 统计。</li>
+<li>多级摘要压缩。</li>
+<li>老消息摘要和保留近期关键消息。</li>
+</ul>
+<p>它回答的是：“当前上下文用了多少，还能不能继续？”</p>
+<h2 id="ContextCompactor">ContextCompactor</h2>
+<p><code>context_compactor.py</code> 是更接近 Claude Code 风格的压缩编排器。<code>ContextCompactor.process_request</code> 的流程：</p>
+<pre><code>messages
+  -&gt; Tool Result Budget: 大工具结果外置化/替换
+  -&gt; Read Dedup: 处理重复读文件结果
+  -&gt; Microcompact: 清理陈旧可压缩内容
+  -&gt; Auto Compact: 高水位触发 session/full compact
+  -&gt; Reactive Recover: API 报 prompt-too-long 后兜底恢复</code></pre>
+<h2 id="Tool-Result-Budget">Tool Result Budget</h2>
+<p>工具结果可能非常大，例如读大文件、跑测试、搜索仓库。MiniCode 会把过大的工具结果持久化到本地，再在上下文中保留摘要或引用，减少 prompt 压力。</p>
+<p>这个思想和 RAG 中“文档块不全部塞进 prompt，只塞相关片段”有点像，但对象从知识库文档变成了 Agent 工具结果。</p>
+<h2 id="Read-Dedup">Read Dedup</h2>
+<p>如果 Agent 多次读取同一个文件，重复内容会浪费大量上下文。Read Dedup 的目标是识别重复读文件结果，减少重复传输，同时保留必要的引用信息。</p>
+<h2 id="Micro-Compact-Auto-Compact-Reactive-Compact">Micro Compact / Auto Compact / Reactive Compact</h2>
+<table>
+<tr><th>类型</th><th>触发时机</th><th>解决问题</th></tr>
+<tr><td>Micro Compact</td><td>平时、轻量、时间或预算驱动</td><td>清理陈旧工具结果，低成本释放空间</td></tr>
+<tr><td>Auto Compact</td><td>上下文接近阈值</td><td>主动压缩历史消息，避免请求失败</td></tr>
+<tr><td>Reactive Compact</td><td>API 已经报超限</td><td>紧急截断/压缩，恢复请求能力</td></tr>
+</table>
+<h2 id="难点-压缩不能丢任务状态">难点：压缩不能丢任务状态</h2>
+<p>长上下文治理最难的是：不能为了省 token 把任务目标、文件变更、用户约束、验证结果压没。MiniCode 通过 working memory、stable task pack、session memory compact 等方式保护关键状态。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>MiniCode 的上下文治理不是“超过就摘要一下”，而是一条分层 pipeline：先预算和去重，再轻量压缩，再主动 compact，最后 reactive recover。它体现了把上下文当成有限资源治理的思路。</p>
+    </section>
+  </main>
+</div>
+</body>
+</html>

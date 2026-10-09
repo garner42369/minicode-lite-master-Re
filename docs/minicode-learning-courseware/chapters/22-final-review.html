@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>8.3 全项目复盘：只看这一页也能讲清 MiniCode - MiniCode 学习课件</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>MiniCode 课件</h1>
+      <p>源码深度讲解</p>
+    </div>
+    <nav class="nav">
+      <a href="../index.html">课程首页</a>
+      <a href="01-project-map.html" class="">1.1 项目图谱：MiniCode 到底是什么</a>
+<a href="02-how-to-read.html" class="">1.2 源码阅读路线：先主链路再子系统</a>
+<a href="03-env-runtime.html" class="">2.1 环境、依赖与运行形态</a>
+<a href="04-entry-flow.html" class="">2.2 入口层：CLI 与 Headless</a>
+<a href="05-agent-loop.html" class="">3.1 Agent 主循环：从想法到工具执行</a>
+<a href="06-tool-calling.html" class="">3.2 Tool Calling：工具注册、执行与截断</a>
+<a href="07-permission-safety.html" class="">3.3 权限与安全：让 Agent 可控地操作本地环境</a>
+<a href="08-model-adapter.html" class="">3.4 模型适配：Anthropic-first 但不是 Anthropic-only</a>
+<a href="09-prompt-product.html" class="">3.5 Prompt 与产品面：系统提示词不是一段字符串</a>
+<a href="10-context-compaction.html" class="">4.1 上下文治理：长任务为什么不会轻易爆掉</a>
+<a href="11-memory-system.html" class="">4.2 记忆系统：从临时上下文到可复用经验</a>
+<a href="12-session-recovery.html" class="">4.3 会话、Checkpoint 与 Rewind</a>
+<a href="13-mcp-skills-hooks.html" class="">5.1 MCP、Skills 与 Hooks：扩展 Agent 能力边界</a>
+<a href="14-subagent-task.html" class="">5.2 子代理与任务协作：主控不失控</a>
+<a href="15-cli-tui.html" class="">5.3 CLI/TUI：本地产品交互面</a>
+<a href="16-harness-eval.html" class="">6.1 Harness 与评估：让 Agent 质量可度量</a>
+<a href="17-cybernetic-control.html" class="">6.2 控制系统：把 Agent 当成可调节运行系统</a>
+<a href="18-tests-ci-docker.html" class="">7.1 测试、CI 与部署：工程质量怎么兜底</a>
+<a href="19-source-index.html" class="">7.2 源码索引：核心文件逐类速查</a>
+<a href="20-highlights-difficulties.html" class="">8.1 亮点、难点与解决方案</a>
+<a href="21-labs.html" class="">8.2 源码精读实验与二次开发任务</a>
+<a href="22-final-review.html" class="active">8.3 全项目复盘：只看这一页也能讲清 MiniCode</a>
+    </nav>
+  </aside>
+  <main class="content">
+    <section>
+      <h1>8.3 全项目复盘：只看这一页也能讲清 MiniCode</h1>
+<h2 id="项目定位">项目定位</h2>
+<p>MiniCode 是一个本地 AI Coding Agent Runtime。它不是 RAG 系统，也不是 LangChain Agent 示例，而是围绕真实代码仓库构建的模型推理、工具执行、安全审查、上下文治理、记忆沉淀、会话恢复和运行时评估系统。</p>
+<h2 id="一句话链路">一句话链路</h2>
+<p>用户提出开发任务后，MiniCode 通过 CLI/TUI 或 headless 入口装配配置、模型、工具、权限、prompt、记忆和会话状态，然后由 <code>run_agent_turn</code> 驱动模型和工具交替执行，最终完成代码读取、修改、验证和回复。</p>
+<h2 id="核心技术栈">核心技术栈</h2>
+<ul>
+<li>Python 3.11+ 自研 Agent Runtime。</li>
+<li>Anthropic Messages API。</li>
+<li>OpenAI-compatible Chat Completions。</li>
+<li>Tool Calling。</li>
+<li>MCP stdio JSON-RPC。</li>
+<li>本地 Session Store。</li>
+<li>Memory System。</li>
+<li>Context Compaction。</li>
+<li>Pytest / Benchmarks / CI / Docker。</li>
+</ul>
+<h2 id="核心源码">核心源码</h2>
+<table>
+<tr><th>方向</th><th>关键文件</th></tr>
+<tr><td>入口</td><td><code>main.py</code>, <code>headless.py</code></td></tr>
+<tr><td>主循环</td><td><code>agent_loop.py</code>, <code>turn_kernel.py</code></td></tr>
+<tr><td>工具</td><td><code>tooling.py</code>, <code>tools/</code></td></tr>
+<tr><td>权限</td><td><code>permissions.py</code>, <code>file_review.py</code>, <code>workspace.py</code></td></tr>
+<tr><td>模型</td><td><code>model_registry.py</code>, <code>anthropic_adapter.py</code>, <code>openai_adapter.py</code></td></tr>
+<tr><td>上下文</td><td><code>context_manager.py</code>, <code>context_compactor.py</code>, <code>micro_compact.py</code></td></tr>
+<tr><td>记忆</td><td><code>memory.py</code>, <code>memory_pipeline.py</code>, <code>working_memory.py</code></td></tr>
+<tr><td>会话</td><td><code>session.py</code>, <code>cli_commands.py</code>, <code>tty_app.py</code></td></tr>
+<tr><td>扩展</td><td><code>mcp.py</code>, <code>skills.py</code>, <code>hooks.py</code>, <code>tools/task.py</code></td></tr>
+<tr><td>评估</td><td><code>runtime_profile_eval.py</code>, <code>cybernetic_ablation.py</code>, <code>release_readiness.py</code></td></tr>
+</table>
+<h2 id="最重要的六个亮点">最重要的六个亮点</h2>
+<ol>
+<li>Agent 主循环工程化：阶段、策略、事件、停止原因可观测。</li>
+<li>Tool Calling 体系完整：工具注册、参数校验、异常兜底、输出截断。</li>
+<li>权限安全可控：路径、命令、编辑、diff、checkpoint、rewind。</li>
+<li>长上下文治理：预算、去重、压缩、超限恢复、工作记忆保护。</li>
+<li>分层记忆沉淀：user/project/local、检索、注入、反思、反馈。</li>
+<li>Harness 评估：过程指标、策略对比、release readiness。</li>
+</ol>
+<h2 id="最核心的难点">最核心的难点</h2>
+<p>MiniCode 的难点不是调用模型，而是让模型能在本地代码仓库里“真的干活”：</p>
+<ul>
+<li>干活要有工具。</li>
+<li>工具要有权限。</li>
+<li>长任务要有上下文治理。</li>
+<li>中断要能恢复。</li>
+<li>经验要能沉淀。</li>
+<li>失败要能观察和评估。</li>
+</ul>
+<h2 id="推荐面试表达">推荐面试表达</h2>
+<p>可以这样讲：</p>
+<div class="note">这个项目我更关注的是 Agent 工程化，而不是简单接一个模型 API。我把一次编程任务抽象成可观测的 Agent Turn，模型通过 Tool Registry 调用文件、命令、Git、测试等工具；工具执行前有权限审查和 diff checkpoint，执行过程中有上下文压缩和记忆注入，执行后会保存 session 并通过 runtime eval 观察完成状态、停止原因和工具轨迹。</div>
+<h2 id="本章小结">本章小结</h2>
+<p>如果只记一句话：MiniCode 的价值在于把 AI Coding Agent 从“会聊天的模型”变成“能在真实仓库里安全执行、持续记忆、可恢复、可评估的本地运行时系统”。</p>
+    </section>
+  </main>
+</div>
+</body>
+</html>

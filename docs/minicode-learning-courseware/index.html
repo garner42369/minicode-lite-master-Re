@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MiniCode 本地 AI Coding Agent 学习课件</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>MiniCode 课件</h1>
+      <p>从源码理解本地 AI Coding Agent Runtime</p>
+    </div>
+    <nav class="nav">
+      <a href="index.html">课程首页</a>
+      <a href="chapters/01-project-map.html">1.1 项目图谱：MiniCode 到底是什么</a>
+<a href="chapters/02-how-to-read.html">1.2 源码阅读路线：先主链路再子系统</a>
+<a href="chapters/03-env-runtime.html">2.1 环境、依赖与运行形态</a>
+<a href="chapters/04-entry-flow.html">2.2 入口层：CLI 与 Headless</a>
+<a href="chapters/05-agent-loop.html">3.1 Agent 主循环：从想法到工具执行</a>
+<a href="chapters/06-tool-calling.html">3.2 Tool Calling：工具注册、执行与截断</a>
+<a href="chapters/07-permission-safety.html">3.3 权限与安全：让 Agent 可控地操作本地环境</a>
+<a href="chapters/08-model-adapter.html">3.4 模型适配：Anthropic-first 但不是 Anthropic-only</a>
+<a href="chapters/09-prompt-product.html">3.5 Prompt 与产品面：系统提示词不是一段字符串</a>
+<a href="chapters/10-context-compaction.html">4.1 上下文治理：长任务为什么不会轻易爆掉</a>
+<a href="chapters/11-memory-system.html">4.2 记忆系统：从临时上下文到可复用经验</a>
+<a href="chapters/12-session-recovery.html">4.3 会话、Checkpoint 与 Rewind</a>
+<a href="chapters/13-mcp-skills-hooks.html">5.1 MCP、Skills 与 Hooks：扩展 Agent 能力边界</a>
+<a href="chapters/14-subagent-task.html">5.2 子代理与任务协作：主控不失控</a>
+<a href="chapters/15-cli-tui.html">5.3 CLI/TUI：本地产品交互面</a>
+<a href="chapters/16-harness-eval.html">6.1 Harness 与评估：让 Agent 质量可度量</a>
+<a href="chapters/17-cybernetic-control.html">6.2 控制系统：把 Agent 当成可调节运行系统</a>
+<a href="chapters/18-tests-ci-docker.html">7.1 测试、CI 与部署：工程质量怎么兜底</a>
+<a href="chapters/19-source-index.html">7.2 源码索引：核心文件逐类速查</a>
+<a href="chapters/20-highlights-difficulties.html">8.1 亮点、难点与解决方案</a>
+<a href="chapters/21-labs.html">8.2 源码精读实验与二次开发任务</a>
+<a href="chapters/22-final-review.html">8.3 全项目复盘：只看这一页也能讲清 MiniCode</a>
+    </nav>
+  </aside>
+  <main class="content">
+    <div class="hero">
+      <h1>MiniCode 本地 AI Coding Agent 学习课件</h1>
+      <p>参考 EduRAG 课件的组织方式，本课件按“项目全景、源码阅读路线、核心模块深度讲解、评估与复盘”的顺序拆解 MiniCode。</p>
+      <div class="meta">
+        <span class="tag">Agent Runtime</span>
+        <span class="tag">Tool Calling</span>
+        <span class="tag">Memory</span>
+        <span class="tag">Context Compaction</span>
+        <span class="tag">Permission Safety</span>
+        <span class="tag">Harness Eval</span>
+      </div>
+    </div>
+    <section>
+      <h2>课程定位</h2>
+      <p>这份课件不把 MiniCode 当成普通 CLI 工具讲，而是把它当成一个本地 Agent Runtime 来学习：模型只是推理核心，真正难点在于如何让模型在真实代码仓库中安全、连续、可恢复、可评估地工作。</p>
+      <p>因此课程会同时讲清技术栈、代码结构、执行流程和设计取舍。你可以用它学习源码，也可以把其中的“项目亮点和难点”转化成简历与面试讲法。</p>
+    </section>
+    <section>
+      <h2>课程目录</h2>
+      <div class="grid"><div class="card"><h3>1.1 项目图谱：MiniCode 到底是什么</h3><p>建立全局视角，理解 MiniCode 与 RAG 项目的差异：它不是问答链路，而是本地 Agent Runtime。</p><a href="chapters/01-project-map.html">开始学习</a></div>
+<div class="card"><h3>1.2 源码阅读路线：先主链路再子系统</h3><p>给出读 MiniCode 的优先级，避免一上来陷入 100 多个模块。</p><a href="chapters/02-how-to-read.html">开始学习</a></div>
+<div class="card"><h3>2.1 环境、依赖与运行形态</h3><p>讲清 MiniCode 为什么是 stdlib-first 项目，以及 CLI、Headless、Docker、CI 的运行方式。</p><a href="chapters/03-env-runtime.html">开始学习</a></div>
+<div class="card"><h3>2.2 入口层：CLI 与 Headless</h3><p>从 main.py 和 headless.py 解释用户输入如何进入 Agent 主循环。</p><a href="chapters/04-entry-flow.html">开始学习</a></div>
+<div class="card"><h3>3.1 Agent 主循环：从想法到工具执行</h3><p>深讲 run_agent_turn 和 turn_kernel：为什么它是整个项目最核心的代码。</p><a href="chapters/05-agent-loop.html">开始学习</a></div>
+<div class="card"><h3>3.2 Tool Calling：工具注册、执行与截断</h3><p>讲清 ToolDefinition、ToolRegistry、核心工具集合和工具输出治理。</p><a href="chapters/06-tool-calling.html">开始学习</a></div>
+<div class="card"><h3>3.3 权限与安全：让 Agent 可控地操作本地环境</h3><p>讲路径权限、危险命令识别、diff 审查和 checkpoint 如何串起来。</p><a href="chapters/07-permission-safety.html">开始学习</a></div>
+<div class="card"><h3>3.4 模型适配：Anthropic-first 但不是 Anthropic-only</h3><p>讲 ModelAdapter 抽象、Anthropic/OpenAI-compatible 适配和模型切换。</p><a href="chapters/08-model-adapter.html">开始学习</a></div>
+<div class="card"><h3>3.5 Prompt 与产品面：系统提示词不是一段字符串</h3><p>讲 PromptBundle、PromptPipeline、指令层、skills、MCP、readiness 如何进入 prompt。</p><a href="chapters/09-prompt-product.html">开始学习</a></div>
+<div class="card"><h3>4.1 上下文治理：长任务为什么不会轻易爆掉</h3><p>讲 token 估算、ContextManager、ContextCompactor、tool budget、dedup、micro/auto/reactive compact。</p><a href="chapters/10-context-compaction.html">开始学习</a></div>
+<div class="card"><h3>4.2 记忆系统：从临时上下文到可复用经验</h3><p>讲 user/project/local memory、BM25 检索、MemoryPipeline、Reflection 和 Working Memory。</p><a href="chapters/11-memory-system.html">开始学习</a></div>
+<div class="card"><h3>4.3 会话、Checkpoint 与 Rewind</h3><p>讲 durable session、delta save、transcript、checkpoint、rewind 和 replay。</p><a href="chapters/12-session-recovery.html">开始学习</a></div>
+<div class="card"><h3>5.1 MCP、Skills 与 Hooks：扩展 Agent 能力边界</h3><p>讲 MCP stdio JSON-RPC、skills 发现加载、hooks 事件和安全边界。</p><a href="chapters/13-mcp-skills-hooks.html">开始学习</a></div>
+<div class="card"><h3>5.2 子代理与任务协作：主控不失控</h3><p>讲 task 工具、explore/plan/general 子代理、工具权限裁剪和中心化协作思路。</p><a href="chapters/14-subagent-task.html">开始学习</a></div>
+<div class="card"><h3>5.3 CLI/TUI：本地产品交互面</h3><p>讲 slash commands、TTY app、transcript、审批提示和实时交互。</p><a href="chapters/15-cli-tui.html">开始学习</a></div>
+<div class="card"><h3>6.1 Harness 与评估：让 Agent 质量可度量</h3><p>讲 runtime_profile_eval、cybernetic_ablation、release_readiness 和 benchmark。</p><a href="chapters/16-harness-eval.html">开始学习</a></div>
+<div class="card"><h3>6.2 控制系统：把 Agent 当成可调节运行系统</h3><p>讲 feedback、feedforward、progress、cost、self-healing 和 cybernetic orchestrator 的意义。</p><a href="chapters/17-cybernetic-control.html">开始学习</a></div>
+<div class="card"><h3>7.1 测试、CI 与部署：工程质量怎么兜底</h3><p>讲 tests 覆盖面、CI 流程、Docker 运行、当前测试依赖缺口。</p><a href="chapters/18-tests-ci-docker.html">开始学习</a></div>
+<div class="card"><h3>7.2 源码索引：核心文件逐类速查</h3><p>按功能列出 MiniCode 核心源码文件，方便后续精读。</p><a href="chapters/19-source-index.html">开始学习</a></div>
+<div class="card"><h3>8.1 亮点、难点与解决方案</h3><p>把项目亮点和难点整理成可复盘、可面试展开的结构。</p><a href="chapters/20-highlights-difficulties.html">开始学习</a></div>
+<div class="card"><h3>8.2 源码精读实验与二次开发任务</h3><p>给出适合学习、调试、面试准备和二次开发的小任务。</p><a href="chapters/21-labs.html">开始学习</a></div>
+<div class="card"><h3>8.3 全项目复盘：只看这一页也能讲清 MiniCode</h3><p>把整套课程压缩成一页复盘，用于快速回忆和面试表达。</p><a href="chapters/22-final-review.html">开始学习</a></div></div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

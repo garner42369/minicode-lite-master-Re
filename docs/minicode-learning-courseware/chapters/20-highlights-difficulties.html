@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>8.1 亮点、难点与解决方案 - MiniCode 学习课件</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>MiniCode 课件</h1>
+      <p>源码深度讲解</p>
+    </div>
+    <nav class="nav">
+      <a href="../index.html">课程首页</a>
+      <a href="01-project-map.html" class="">1.1 项目图谱：MiniCode 到底是什么</a>
+<a href="02-how-to-read.html" class="">1.2 源码阅读路线：先主链路再子系统</a>
+<a href="03-env-runtime.html" class="">2.1 环境、依赖与运行形态</a>
+<a href="04-entry-flow.html" class="">2.2 入口层：CLI 与 Headless</a>
+<a href="05-agent-loop.html" class="">3.1 Agent 主循环：从想法到工具执行</a>
+<a href="06-tool-calling.html" class="">3.2 Tool Calling：工具注册、执行与截断</a>
+<a href="07-permission-safety.html" class="">3.3 权限与安全：让 Agent 可控地操作本地环境</a>
+<a href="08-model-adapter.html" class="">3.4 模型适配：Anthropic-first 但不是 Anthropic-only</a>
+<a href="09-prompt-product.html" class="">3.5 Prompt 与产品面：系统提示词不是一段字符串</a>
+<a href="10-context-compaction.html" class="">4.1 上下文治理：长任务为什么不会轻易爆掉</a>
+<a href="11-memory-system.html" class="">4.2 记忆系统：从临时上下文到可复用经验</a>
+<a href="12-session-recovery.html" class="">4.3 会话、Checkpoint 与 Rewind</a>
+<a href="13-mcp-skills-hooks.html" class="">5.1 MCP、Skills 与 Hooks：扩展 Agent 能力边界</a>
+<a href="14-subagent-task.html" class="">5.2 子代理与任务协作：主控不失控</a>
+<a href="15-cli-tui.html" class="">5.3 CLI/TUI：本地产品交互面</a>
+<a href="16-harness-eval.html" class="">6.1 Harness 与评估：让 Agent 质量可度量</a>
+<a href="17-cybernetic-control.html" class="">6.2 控制系统：把 Agent 当成可调节运行系统</a>
+<a href="18-tests-ci-docker.html" class="">7.1 测试、CI 与部署：工程质量怎么兜底</a>
+<a href="19-source-index.html" class="">7.2 源码索引：核心文件逐类速查</a>
+<a href="20-highlights-difficulties.html" class="active">8.1 亮点、难点与解决方案</a>
+<a href="21-labs.html" class="">8.2 源码精读实验与二次开发任务</a>
+<a href="22-final-review.html" class="">8.3 全项目复盘：只看这一页也能讲清 MiniCode</a>
+    </nav>
+  </aside>
+  <main class="content">
+    <section>
+      <h1>8.1 亮点、难点与解决方案</h1>
+<h2 id="学习目标">学习目标</h2>
+<ul>
+<li>把 MiniCode 的技术点转成项目亮点。</li>
+<li>理解每个难点背后的工程问题。</li>
+<li>形成面试时可展开的讲法。</li>
+</ul>
+<h2 id="亮点一-自研-Agent-Runtime">亮点一：自研 Agent Runtime</h2>
+<p>难点：不能只调用模型，因为 coding agent 需要多轮推理、工具执行、验证和失败恢复。</p>
+<p>解决：用 <code>agent_loop.py</code> 和 <code>turn_kernel.py</code> 实现主循环和状态机，把任务拆成 explore、execute、verify 阶段，并记录 runtime event、stop reason、widening、guard 等过程指标。</p>
+<p>面试讲法：我不是简单封装 LLM API，而是实现了一个本地 Agent Runtime，让模型通过受控工具完成代码分析、修改和验证。</p>
+<h2 id="亮点二-统一-Tool-Calling-框架">亮点二：统一 Tool Calling 框架</h2>
+<p>难点：工具种类多，文件、命令、Git、测试、MCP 的风险和输出格式都不同。</p>
+<p>解决：用 <code>ToolDefinition</code>、<code>ToolRegistry</code>、<code>ToolContext</code>、<code>ToolResult</code> 统一工具协议，通过 metadata 标注只读、破坏性、可并发和权限需求，并对大输出做智能截断。</p>
+<p>面试讲法：我把工具从普通函数抽象成可注册、可校验、可审计、可限流的 Agent 动作。</p>
+<h2 id="亮点三-权限安全审查">亮点三：权限安全审查</h2>
+<p>难点：模型可能生成危险命令或错误文件修改，真实仓库不能无保护执行。</p>
+<p>解决：路径访问限制在 workspace 内，危险命令进入审批，文件写入前生成 diff 并创建 checkpoint，支持 rewind 恢复。</p>
+<p>面试讲法：模型只负责提出动作，真正落地前必须经过权限边界和变更审查。</p>
+<h2 id="亮点四-长上下文治理">亮点四：长上下文治理</h2>
+<p>难点：Agent 会不断读取文件、执行命令、收集测试结果，messages 很快超过模型窗口。</p>
+<p>解决：用 token 估算、tool result budget、read dedup、micro compact、auto compact 和 reactive compact 分层治理，同时用 working memory 保护关键任务状态。</p>
+<p>面试讲法：我把上下文当成有限资源，而不是无限往 prompt 里塞。</p>
+<h2 id="亮点五-分层记忆系统">亮点五：分层记忆系统</h2>
+<p>难点：Agent 每次从零开始会重复犯错，旧记忆又可能污染上下文。</p>
+<p>解决：把记忆分成 user/project/local 三层，结合 BM25、tag/category/domain、reranker、adaptive cooldown、reflection 和 feedback 实现按需召回和沉淀。</p>
+<p>面试讲法：记忆系统不是聊天记录，而是从执行过程提炼可复用的项目经验和用户偏好。</p>
+<h2 id="亮点六-会话恢复和-Rewind">亮点六：会话恢复和 Rewind</h2>
+<p>难点：长任务中断后，恢复不能只靠聊天历史，还要恢复文件状态和运行状态。</p>
+<p>解决：session 保存 messages、transcript、permissions、readiness、checkpoints；文件修改前 checkpoint，支持 inspect、replay、rewind 和 reverse checkpoint。</p>
+<p>面试讲法：我把一次 Agent 会话做成可检查、可回放、可撤销的运行现场。</p>
+<h2 id="亮点七-Harness-评估">亮点七：Harness 评估</h2>
+<p>难点：Agent 质量不能只看最后一句回答，过程质量同样重要。</p>
+<p>解决：Runtime Eval 记录 model calls、tool events、runtime events、stop reason、verification guard；Cybernetic Ablation 比较 baseline 和控制器策略；Release Readiness 输出发布门禁报告。</p>
+<p>面试讲法：我建立了 Agent 的可观测评估链路，用过程指标定位复杂任务中的稳定性问题。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>MiniCode 的核心亮点不是某一个库，而是 Agent 工程思维：运行时、工具、安全、上下文、记忆、恢复和评估共同构成一个可控系统。</p>
+    </section>
+  </main>
+</div>
+</body>
+</html>
